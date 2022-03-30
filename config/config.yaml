@@ -1,0 +1,19 @@
+info:
+ # version: 1.0.0
+  description: local configuration
+
+configuration:
+  sbi: # Service-based interface information
+    scheme: http # the protocol for sbi (http or https)
+    bindingIPv4: 10.67.29.58  # IP used to bind the service
+    port: 1928 # port used to bind the service
+
+
+# the kind of log output
+  # debugLevel: how detailed to output, value: trace, debug, info, warn, error, fatal, panic
+  # ReportCaller: enable the caller report or not, value: true or false
+logger:
+  SERVICE:
+    debugLevel: error
+    ReportCaller: false
+ 

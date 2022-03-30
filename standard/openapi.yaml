@@ -1,0 +1,789 @@
+openapi: 3.0.0
+info:
+  description: |
+    Nsoraf Steering Of Roaming Service.
+    © 2021, 3GPP Organizational Partners (ARIB, ATIS, CCSA, ETSI, TSDSI, TTA, TTC).
+    All rights reserved.
+  title: Nsoraf_SOR
+  version: 1.0.1
+externalDocs:
+  description: 3GPP TS 29.550 V16.4.0; Steering Of Roaming Application Function Services.
+  url: http://www.3gpp.org/ftp/Specs/archive/29_series/29.550/
+servers:
+- url: '{apiRoot}/nsoraf-sor/v1'
+  variables:
+    apiRoot:
+      default: https://example.com
+      description: apiRoot as defined in clause 4.4 of 3GPP TS 29.501
+security:
+- {}
+- oAuth2ClientCredentials:
+  - nsoraf-sor
+paths:
+  /{supi}/sor-information:
+    get:
+      operationId: GetSorInformation
+      parameters:
+      - description: Identifier of the UE
+        explode: false
+        in: path
+        name: supi
+        required: true
+        schema:
+          $ref: '#/components/schemas/Supi'
+        style: simple
+      - description: Supported Features
+        explode: true
+        in: query
+        name: supported-features
+        required: false
+        schema:
+          $ref: '#/components/schemas/SupportedFeatures'
+        style: form
+      - content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlmnId'
+        description: serving PLMN ID
+        explode: true
+        in: query
+        name: plmn-id
+        required: true
+        style: form
+      - content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessType'
+        description: Access type used by the UE
+        explode: true
+        in: query
+        name: access-type
+        required: false
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SorInformation'
+          description: Expected response to a valid request
+          headers:
+            Cache-Control:
+              description: Cache-Control (as described in RFC 7234) with value "no-cache"
+                to indicate that the returned SoR information should not be cached
+              explode: false
+              schema:
+                type: string
+              style: simple
+        "307":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+          description: Temporary Redirect
+          headers:
+            Location:
+              description: The URI pointing to the resource located on the redirect
+                target
+              required: true
+              schema:
+                type: string
+            "3gpp-Sbi-Target-Nf-Id":
+              description: Identifier of target NF (service) instance towards which
+                the request is redirected
+              schema:
+                type: string
+        "308":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+          description: Permanent Redirect
+          headers:
+            Location:
+              description: The URI pointing to the resource located on the redirect
+                target
+              required: true
+              schema:
+                type: string
+            "3gpp-Sbi-Target-Nf-Id":
+              description: Identifier of target NF (service) instance towards which
+                the request is redirected
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Bad request
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Not Found
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal Server Error
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Service Unavailable
+        default:
+          description: Unexpected error
+      summary: retrieve the steering of roaming information for a UE
+      tags:
+      - SoR Information Retrieval
+    post:
+      callbacks:
+        notificationDestination:
+          '{request.body#/notificationDestination}':
+            post:
+              operationId: notificationDestination_request_bodyNotificationDestinationPost
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/SorInformation'
+                required: true
+              responses:
+                "204":
+                  description: No Content (successful notification)
+                "307":
+                  description: Temporary Redirect
+                  headers:
+                    Location:
+                      description: An alternative URI of the resource.
+                      required: true
+                      schema:
+                        type: string
+                "308":
+                  description: Permanent Redirect
+                  headers:
+                    Location:
+                      description: An alternative URI of the resource.
+                      required: true
+                      schema:
+                        type: string
+                "400":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Bad request
+                "401":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Unauthorized
+                "403":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Forbidden
+                "404":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Not Found
+                "411":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Length Required
+                "413":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Payload Too Large
+                "415":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Unsupported Media Type
+                "429":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Too Many Requests
+                "500":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Internal Server Error
+                "503":
+                  content:
+                    application/problem+json:
+                      schema:
+                        $ref: '#/components/schemas/ProblemDetails'
+                  description: Service Unavailable
+                default:
+                  description: Generic Error
+              x-callback-request: true
+      operationId: PutSorInformation
+      parameters:
+      - description: Identifier of the UE
+        explode: false
+        in: path
+        name: supi
+        required: true
+        schema:
+          $ref: '#/components/schemas/Supi'
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SorInformationPrivision'
+        required: true
+      responses:
+        "204":
+          description: Successful reception of the indication
+        "307":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+          description: Temporary Redirect
+          headers:
+            Location:
+              description: The URI pointing to the resource located on the redirect
+                target
+              required: true
+              schema:
+                type: string
+            "3gpp-Sbi-Target-Nf-Id":
+              description: Identifier of target NF (service) instance towards which
+                the request is redirected
+              schema:
+                type: string
+        "308":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+          description: Permanent Redirect
+          headers:
+            Location:
+              description: The URI pointing to the resource located on the redirect
+                target
+              required: true
+              schema:
+                type: string
+            "3gpp-Sbi-Target-Nf-Id":
+              description: Identifier of target NF (service) instance towards which
+                the request is redirected
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Bad request
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Not Found
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal Server Error
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Service Unavailable
+        default:
+          description: Unexpected error
+      summary: SoR Acknowledgment change
+      tags:
+      - privision sor info
+  /{supi}/sor-information/sor-ack:
+    put:
+      operationId: SorAckInfo
+      parameters:
+      - description: Identifier of the UE
+        explode: false
+        in: path
+        name: supi
+        required: true
+        schema:
+          $ref: '#/components/schemas/Supi'
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SorAckInfo'
+        required: true
+      responses:
+        "204":
+          description: Successful reception of the indication
+        "307":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+          description: Temporary Redirect
+          headers:
+            Location:
+              description: The URI pointing to the resource located on the redirect
+                target
+              required: true
+              schema:
+                type: string
+            "3gpp-Sbi-Target-Nf-Id":
+              description: Identifier of target NF (service) instance towards which
+                the request is redirected
+              schema:
+                type: string
+        "308":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+          description: Permanent Redirect
+          headers:
+            Location:
+              description: The URI pointing to the resource located on the redirect
+                target
+              required: true
+              schema:
+                type: string
+            "3gpp-Sbi-Target-Nf-Id":
+              description: Identifier of target NF (service) instance towards which
+                the request is redirected
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Bad request
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Not Found
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal Server Error
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Service Unavailable
+        default:
+          description: Unexpected error
+      summary: SoR Acknowledgment Reception Notification
+      tags:
+      - Providing the reception status of the acknowledgement of Steering of Roaming
+        information reception by the UE
+components:
+  schemas:
+    SorInformation:
+      example:
+        sorSendingTime: 2000-01-23T04:56:07.000+00:00
+        sorAckIndication: true
+      properties:
+        steeringContainer:
+          $ref: '#/components/schemas/SteeringContainer'
+        sorAckIndication:
+          type: boolean
+        sorSendingTime:
+          format: date-time
+          type: string
+      required:
+      - sorAckIndication
+      - sorSendingTime
+      type: object
+    SorAckInfo:
+      example:
+        sorSendingTime: 2000-01-23T04:56:07.000+00:00
+      properties:
+        sorAckStatus:
+          $ref: '#/components/schemas/SorAckStatus'
+        sorSendingTime:
+          format: date-time
+          type: string
+      required:
+      - sorAckStatus
+      - sorSendingTime
+      type: object
+    SorAckStatus:
+      enum:
+      - ACK_SUCCESSFUL
+      - ACK_NOT_RECEIVED
+      - ACK_NOT_SUCCESSFUL
+      type: string
+    SorInformationPrivision:
+      example:
+        notificationDestination: notificationDestination
+        sorInformation:
+          sorSendingTime: 2000-01-23T04:56:07.000+00:00
+          sorAckIndication: true
+      properties:
+        notificationDestination:
+          description: string formatted according to IETF RFC 3986 identifying a referenced
+            resource.
+          type: string
+        sorInformation:
+          $ref: '#/components/schemas/SorInformation'
+      required:
+      - notificationDestination
+      - sorInformation
+      type: object
+    Supi:
+      pattern: ^(imsi-[0-9]{5,15}|nai-.+|gci-.+|gli-.+|.+)$
+      type: string
+    SupportedFeatures:
+      pattern: ^[A-Fa-f0-9]*$
+      type: string
+    PlmnId:
+      properties:
+        mcc:
+          pattern: ^\d{3}$
+          type: string
+        mnc:
+          pattern: ^\d{2,3}$
+          type: string
+      required:
+      - mcc
+      - mnc
+      type: object
+    Mcc:
+      pattern: ^\d{3}$
+      type: string
+    Mnc:
+      pattern: ^\d{2,3}$
+      type: string
+    AccessType:
+      enum:
+      - 3GPP_ACCESS
+      - NON_3GPP_ACCESS
+      type: string
+    RedirectResponse:
+      properties:
+        cause:
+          type: string
+        targetScp:
+          type: string
+      type: object
+    Uri:
+      type: string
+    ProblemDetails:
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        cause:
+          type: string
+        invalidParams:
+          items:
+            $ref: '#/components/schemas/InvalidParam'
+          minItems: 1
+          type: array
+        supportedFeatures:
+          pattern: ^[A-Fa-f0-9]*$
+          type: string
+        accessTokenError:
+          $ref: '#/components/schemas/AccessTokenErr'
+        accessTokenRequest:
+          $ref: '#/components/schemas/AccessTokenReq'
+        nrfId:
+          type: string
+      type: object
+    InvalidParam:
+      properties:
+        param:
+          type: string
+        reason:
+          type: string
+      required:
+      - param
+      type: object
+    ProblemDetails_1:
+      properties:
+        type:
+          description: string providing an URI formatted according to IETF RFC 3986.
+          type: string
+        title:
+          description: A short, human-readable summary of the problem type. It should
+            not change from occurrence to occurrence of the problem.
+          type: string
+        status:
+          description: The HTTP status code for this occurrence of the problem.
+          type: integer
+        detail:
+          description: A human-readable explanation specific to this occurrence of
+            the problem.
+          type: string
+        instance:
+          description: string providing an URI formatted according to IETF RFC 3986.
+          type: string
+        cause:
+          description: A machine-readable application error cause specific to this
+            occurrence of the problem. This IE should be present and provide application-related
+            error information, if available.
+          type: string
+        invalidParams:
+          description: Description of invalid parameters, for a request rejected due
+            to invalid parameters.
+          items:
+            $ref: '#/components/schemas/InvalidParam_1'
+          minItems: 1
+          type: array
+      type: object
+    Uri_1:
+      description: string providing an URI formatted according to IETF RFC 3986.
+      type: string
+    InvalidParam_1:
+      properties:
+        param:
+          description: Attribute's name encoded as a JSON Pointer, or header's name.
+          type: string
+        reason:
+          description: A human-readable reason, e.g. "must be a positive integer".
+          type: string
+      required:
+      - param
+      type: object
+    SteeringContainer:
+      items:
+        $ref: '#/components/schemas/SteeringInfo'
+      minItems: 1
+      type: array
+    DateTime:
+      format: date-time
+      type: string
+    Link:
+      description: string formatted according to IETF RFC 3986 identifying a referenced
+        resource.
+      type: string
+    AccessTokenErr:
+      description: Error returned in the access token response message
+      properties:
+        error:
+          enum:
+          - invalid_request
+          - invalid_client
+          - invalid_grant
+          - unauthorized_client
+          - unsupported_grant_type
+          - invalid_scope
+          type: string
+        error_description:
+          type: string
+        error_uri:
+          type: string
+      required:
+      - error
+      type: object
+    AccessTokenReq:
+      description: Contains information related to the access token request
+      properties:
+        grant_type:
+          enum:
+          - client_credentials
+          type: string
+        nfInstanceId:
+          format: uuid
+          type: string
+        nfType:
+          $ref: '#/components/schemas/NFType'
+        targetNfType:
+          $ref: '#/components/schemas/NFType'
+        scope:
+          pattern: ^([a-zA-Z0-9_:-]+)( [a-zA-Z0-9_:-]+)*$
+          type: string
+        targetNfInstanceId:
+          format: uuid
+          type: string
+        requesterPlmn:
+          $ref: '#/components/schemas/PlmnId'
+        requesterPlmnList:
+          items:
+            $ref: '#/components/schemas/PlmnId'
+          minItems: 2
+          type: array
+        requesterSnssaiList:
+          items:
+            $ref: '#/components/schemas/Snssai'
+          minItems: 1
+          type: array
+        requesterFqdn:
+          description: Fully Qualified Domain Name
+          type: string
+        requesterSnpnList:
+          items:
+            $ref: '#/components/schemas/PlmnIdNid'
+          minItems: 1
+          type: array
+        targetPlmn:
+          $ref: '#/components/schemas/PlmnId'
+        targetSnssaiList:
+          items:
+            $ref: '#/components/schemas/Snssai'
+          minItems: 1
+          type: array
+        targetNsiList:
+          items:
+            type: string
+          minItems: 1
+          type: array
+        targetNfSetId:
+          type: string
+        targetNfServiceSetId:
+          type: string
+      required:
+      - grant_type
+      - nfInstanceId
+      - scope
+      type: object
+    SteeringInfo:
+      properties:
+        plmnId:
+          $ref: '#/components/schemas/PlmnId'
+        accessTechList:
+          items:
+            $ref: '#/components/schemas/AccessTech'
+          minItems: 1
+          type: array
+      required:
+      - plmnId
+      type: object
+    AccessTech:
+      enum:
+      - NR
+      - EUTRAN_IN_WBS1_MODE_AND_NBS1_MODE
+      - EUTRAN_IN_NBS1_MODE_ONLY
+      - EUTRAN_IN_WBS1_MODE_ONLY
+      - UTRAN
+      - GSM_AND_ECGSM_IoT
+      - GSM_WITHOUT_ECGSM_IoT
+      - ECGSM_IoT_ONLY
+      - CDMA_1xRTT
+      - CDMA_HRPD
+      - GSM_COMPACT
+      type: string
+    NfInstanceId:
+      format: uuid
+      type: string
+    NFType:
+      enum:
+      - NRF
+      - UDM
+      - AMF
+      - SMF
+      - AUSF
+      - NEF
+      - PCF
+      - SMSF
+      - NSSF
+      - SORAF
+      - LMF
+      - GMLC
+      - 5G_EIR
+      - SEPP
+      - UPF
+      - N3IWF
+      - AF
+      - UDSF
+      - BSF
+      - CHF
+      - NWDAF
+      - PCSCF
+      - CBCF
+      - HSS
+      - UCMF
+      - SOR_AF
+      - SPAF
+      - MME
+      - SCSAS
+      - SCEF
+      - SCP
+      - NSSAAF
+      - ICSCF
+      - SCSCF
+      - DRA
+      - IMS_AS
+      - CEF
+      type: string
+    Snssai:
+      properties:
+        sst:
+          maximum: 255
+          minimum: 0
+          type: integer
+        sd:
+          pattern: ^[A-Fa-f0-9]{6}$
+          type: string
+      required:
+      - sst
+      type: object
+    Fqdn:
+      description: Fully Qualified Domain Name
+      type: string
+    PlmnIdNid:
+      properties:
+        mcc:
+          pattern: ^\d{3}$
+          type: string
+        mnc:
+          pattern: ^\d{2,3}$
+          type: string
+        nid:
+          pattern: ^[A-Fa-f0-9]{11}$
+          type: string
+      required:
+      - mcc
+      - mnc
+      type: object
+    Nid:
+      pattern: ^[A-Fa-f0-9]{11}$
+      type: string
+    NfSetId:
+      type: string
+    NfServiceSetId:
+      type: string
+  securitySchemes:
+    oAuth2ClientCredentials:
+      flows:
+        clientCredentials:
+          scopes:
+            nsoraf-sor: Access to the Nsoraf_SOR API
+          tokenUrl: '{nrfApiRoot}/oauth2/token'
+      type: oauth2
